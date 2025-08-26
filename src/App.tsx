@@ -70,7 +70,7 @@ function App() {
 
   const triggerN8NWebhook = async (metaId: string) => {
     try {
-      await fetch('https://n8n.digital-vereinfacht.de/webhook/sync-ninox-prices', {
+      const response = await fetch('https://n8n.digital-vereinfacht.de/webhook/sync-ninox-prices', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,9 +79,53 @@ function App() {
           uuid: metaId
         })
       });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Webhook response:', data);
+        
+        // Check if we received file data
+        if (Array.isArray(data) && data.length > 0 && data[0].url) {
+          const fileInfo = data[0];
+          await downloadFile(fileInfo.url, fileInfo.fileName || 'document.pdf');
+        }
+      }
+      
       console.log('Webhook to N8N triggered');
     } catch (error) {
       console.error('Failed to trigger N8N webhook:', error);
+    }
+  };
+
+  const downloadFile = async (url: string, fileName: string) => {
+    try {
+      // Fetch the file from Carbone.io
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to download file: ${response.statusText}`);
+      }
+      
+      // Get the file as a blob
+      const blob = await response.blob();
+      
+      // Create a temporary URL for the blob
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element and trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      console.log(`File "${fileName}" downloaded successfully`);
+    } catch (error) {
+      console.error('Failed to download file:', error);
     }
   };
 
@@ -376,8 +420,11 @@ function App() {
             <p className="text-green-700 font-medium text-sm md:text-base mb-3">
               Ihre Preise wurden erfolgreich übermittelt und gespeichert.
             </p>
-            <p className="text-green-600 text-xs md:text-sm">
+            <p className="text-green-600 text-xs md:text-sm mb-2">
               Das Formular ist nun gesperrt und kann nicht mehr bearbeitet werden.
+            </p>
+            <p className="text-green-600 text-xs md:text-sm">
+              📄 Ihr Angebotsdokument wird automatisch heruntergeladen.
             </p>
           </div>
         )}
