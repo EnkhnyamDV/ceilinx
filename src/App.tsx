@@ -32,6 +32,7 @@ function App() {
   React.useEffect(() => {
     if (positions.length > 0) {
       setLocalPositions(positions);
+      
       // Initialize input values with formatted prices
       const initialInputValues: Record<string, string> = {};
       const initialCommentValues: Record<string, string> = {};
@@ -61,6 +62,11 @@ function App() {
   }, [meta]);
 
   const isFormSubmitted = meta?.status === 'abgegeben';
+
+  // Helper function to calculate total price for a position
+  const calculateGesamtpreis = (position: FormPosition): number => {
+    return (position.menge || 0) * (position.einzelpreis_netto || 0);
+  };
 
   const triggerN8NWebhook = async (metaId: string) => {
     try {
@@ -198,9 +204,15 @@ function App() {
 
   const getTotalValue = () => {
     return localPositions.reduce((sum, pos) => {
-      return sum + (pos.einzelpreis_netto || 0);
+      return sum + calculateGesamtpreis(pos);
     }, 0);
   };
+
+  const getTotalValueTimesQuantity = () => {
+    return localPositions.reduce((sum, pos) => {
+      return sum + calculateGesamtpreis;
+    }, 0);
+  }
 
   const hasValidPrices = localPositions.some(pos => (pos.einzelpreis_netto || 0) > 0);
 
@@ -458,6 +470,15 @@ function App() {
                     </div>
                   )}
                   
+                  {/* Quantity */}
+                  {position.menge && (
+                    <div className="mb-3">
+                      <span className="inline-block px-2 py-1 bg-green-50 text-green-700 text-xs rounded-md border border-green-200">
+                        Menge: {formatGermanNumber(position.menge)}
+                      </span>
+                    </div>
+                  )}
+                  
                   {/* Price Input Section */}
                   <div className="bg-gray-50/80 rounded-lg p-3 mb-3 border border-gray-100">
                     <div className="flex items-center justify-between">
@@ -482,6 +503,18 @@ function App() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Total Price Display */}
+                  {calculateGesamtpreis(position) > 0 && (
+                    <div className="bg-blue-50/80 rounded-lg p-3 mb-3 border border-blue-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-blue-700">Gesamtpreis netto (€):</span>
+                        <div className="px-3 py-1 bg-blue-100 rounded-lg text-right font-mono text-sm text-blue-800 border border-blue-200 font-semibold">
+                          {formatGermanNumber(calculateGesamtpreis(position))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Comment Section */}
                   {!isFormSubmitted && (
@@ -543,8 +576,12 @@ function App() {
                     <th className="text-left py-3 px-2 font-semibold text-[#020028] w-20">OZ</th>
                     <th className="text-left py-3 px-2 font-semibold text-[#020028]">Bezeichnung</th>
                     <th className="text-center py-3 px-2 font-semibold text-[#020028] w-24">Einheit</th>
+                    <th className="text-center py-3 px-2 font-semibold text-[#020028] w-24">Menge</th>
                     <th className="text-right py-3 px-2 font-semibold text-[#020028] w-40 whitespace-nowrap">
                       Einzelpreis netto (€)
+                    </th>
+                    <th className="text-right py-3 px-2 font-semibold text-[#020028] w-40 whitespace-nowrap">
+                      Gesamtpreis netto (€)
                     </th>
                   </tr>
                 </thead>
@@ -643,6 +680,13 @@ function App() {
                           </span>
                         )}
                       </td>
+                      <td className="py-4 px-2 w-24 text-center">
+                        {position.menge && (
+                          <span className="font-mono text-sm text-gray-700">
+                            {formatGermanNumber(position.menge)}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-4 px-2 w-40">
                         <div className="flex justify-end">
                           {isFormSubmitted ? (
@@ -663,6 +707,13 @@ function App() {
                           )}
                         </div>
                       </td>
+                      <td className="py-4 px-2 w-40">
+                        <div className="flex justify-end">
+                          <div className="w-28 px-3 py-2 bg-gray-50 rounded-lg text-right font-mono text-sm text-gray-700 border border-gray-200 shadow-sm">
+                            {formatGermanNumber(calculateGesamtpreis(position))}
+                          </div>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -677,11 +728,25 @@ function App() {
                   : 'bg-[#EAEFF7] border-[#203AEA]'
               }`}>
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
-                  <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Positionen:</span>
+                  <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Nettopreise:</span>
                   <span className={`text-xl md:text-2xl font-bold ${
                     isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
                   }`}>
                     {formatGermanNumber(getTotalValue())} €
+                  </span>
+                </div>
+              </div>
+              <div className={`mt-6 p-4 rounded-xl border-l-4 shadow-sm ${
+                isFormSubmitted 
+                  ? 'bg-green-50 border-green-500' 
+                  : 'bg-[#EAEFF7] border-[#203AEA]'
+              }`}>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
+                  <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtpreise:</span>
+                  <span className={`text-xl md:text-2xl font-bold ${
+                    isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
+                  }`}>
+                    {formatGermanNumber(getTotalValueTimesQuantity())} €
                   </span>
                 </div>
               </div>

@@ -69,7 +69,7 @@ export function useFormData(formId: string | null) {
   const updatePositions = async (updatedPositions: FormPosition[]) => {
     try {
       // Update each position individually to avoid RLS issues
-      // Update einzelpreis_netto and kommentar
+      // Update einzelpreis_netto and kommentar (gesamtpreis_netto is calculated in frontend)
       const updatePromises = updatedPositions.map(position => 
         supabase
           .from('form_positionen')
