@@ -6,7 +6,15 @@ import { FormPosition } from './lib/supabase';
 import { CollapsibleText } from './components/CollapsibleText';
 
 function App() {
+  // Add error boundary for debugging
+  React.useEffect(() => {
+    console.log('App component loaded');
+    console.log('Available environment variables:', import.meta.env);
+  }, []);
+
   const formId = getFormIdFromUrl();
+  console.log('Form ID from URL:', formId);
+  
   const { meta, positions, loading, error, refetch, updatePositions, updateFormStatus, updateGeneralComment } = useFormData(formId);
   
   const [localPositions, setLocalPositions] = useState<FormPosition[]>([]);

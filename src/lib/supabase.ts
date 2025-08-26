@@ -1,9 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://iakvrpgivggrbmpzyoyw.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlha3ZycGdpdmdncmJtcHp5b3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk2NTA4MTUsImV4cCI6MjA2NTIyNjgxNX0.pizN0qMeENwq4JunhHEJ6dWaN_X3yyMnBxXux-vnBk4';
+
+console.log('Environment check:', {
+  supabaseUrl: supabaseUrl ? 'Present' : 'Missing',
+  supabaseAnonKey: supabaseAnonKey ? 'Present' : 'Missing',
+  allEnvVars: import.meta.env
+});
 
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase environment variables missing:', {
+    VITE_SUPABASE_URL: supabaseUrl,
+    VITE_SUPABASE_ANON_KEY: supabaseAnonKey ? '***PRESENT***' : 'MISSING'
+  });
   throw new Error('Missing Supabase environment variables');
 }
 
