@@ -84,10 +84,19 @@ function App() {
         const data = await response.json();
         console.log('Webhook response:', data);
         
-        // Check if we received file data
+        // Handle both array and single object responses
+        let fileInfo = null;
         if (Array.isArray(data) && data.length > 0 && data[0].url) {
-          const fileInfo = data[0];
+          fileInfo = data[0];
+        } else if (data && data.url) {
+          fileInfo = data;
+        }
+        
+        if (fileInfo) {
+          console.log('Downloading file:', fileInfo.fileName, 'from:', fileInfo.url);
           await downloadFile(fileInfo.url, fileInfo.fileName || 'document.pdf');
+        } else {
+          console.warn('No file URL found in webhook response');
         }
       }
       
@@ -99,33 +108,51 @@ function App() {
 
   const downloadFile = async (url: string, fileName: string) => {
     try {
+      console.log('Starting download from URL:', url);
+      
       // Fetch the file from Carbone.io
       const response = await fetch(url);
+      console.log('Fetch response status:', response.status, response.statusText);
       
       if (!response.ok) {
-        throw new Error(`Failed to download file: ${response.statusText}`);
+        throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
       }
       
       // Get the file as a blob
       const blob = await response.blob();
+      console.log('Blob created, size:', blob.size, 'type:', blob.type);
       
       // Create a temporary URL for the blob
       const blobUrl = window.URL.createObjectURL(blob);
+      console.log('Blob URL created:', blobUrl);
       
       // Create a temporary anchor element and trigger download
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = fileName;
+      link.style.display = 'none'; // Hide the link
+      
+      console.log('Adding link to document and clicking...');
       document.body.appendChild(link);
       link.click();
       
-      // Clean up
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
+      // Small delay before cleanup to ensure download starts
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        console.log(`File "${fileName}" download triggered and cleaned up`);
+      }, 100);
       
-      console.log(`File "${fileName}" downloaded successfully`);
     } catch (error) {
       console.error('Failed to download file:', error);
+      
+      // Fallback: Open the URL in a new tab
+      try {
+        console.log('Fallback: Opening URL in new tab');
+        window.open(url, '_blank');
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError);
+      }
     }
   };
 
