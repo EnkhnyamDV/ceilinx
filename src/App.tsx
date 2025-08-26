@@ -110,48 +110,108 @@ function App() {
     try {
       console.log('Starting download from URL:', url);
       
-      // Fetch the file from Carbone.io
-      const response = await fetch(url);
+      // First try: Use fetch with proper headers to avoid CORS/security issues
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf,application/octet-stream,*/*',
+        },
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      
       console.log('Fetch response status:', response.status, response.statusText);
       
       if (!response.ok) {
         throw new Error(`Failed to download file: ${response.status} ${response.statusText}`);
       }
       
-      // Get the file as a blob
+      // Get the file as a blob with explicit PDF type
       const blob = await response.blob();
-      console.log('Blob created, size:', blob.size, 'type:', blob.type);
       
-      // Create a temporary URL for the blob
-      const blobUrl = window.URL.createObjectURL(blob);
-      console.log('Blob URL created:', blobUrl);
+      // Ensure the blob has the correct MIME type
+      const pdfBlob = blob.type === 'application/pdf' 
+        ? blob 
+        : new Blob([blob], { type: 'application/pdf' });
       
-      // Create a temporary anchor element and trigger download
+      console.log('Blob created, size:', pdfBlob.size, 'type:', pdfBlob.type);
+      
+      // Method 1: Try using the File System Access API (if available)
+      if ('showSaveFilePicker' in window) {
+        try {
+          const fileHandle = await (window as any).showSaveFilePicker({
+            suggestedName: fileName.replace('.docx', '.pdf'),
+            types: [{
+              description: 'PDF files',
+              accept: { 'application/pdf': ['.pdf'] }
+            }]
+          });
+          
+          const writable = await fileHandle.createWritable();
+          await writable.write(pdfBlob);
+          await writable.close();
+          
+          console.log(`File "${fileName}" saved successfully using File System Access API`);
+          return;
+        } catch (fsError) {
+          console.log('File System Access API failed, falling back to blob download');
+        }
+      }
+      
+      // Method 2: Traditional blob download with improved approach
+      const blobUrl = window.URL.createObjectURL(pdfBlob);
+      
+      // Create a more secure download approach
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = fileName;
-      link.style.display = 'none'; // Hide the link
+      link.download = fileName.replace('.docx', '.pdf'); // Ensure .pdf extension
+      link.style.display = 'none';
+      link.rel = 'noopener noreferrer'; // Security improvement
       
-      console.log('Adding link to document and clicking...');
+      // Trigger download in a user gesture context
       document.body.appendChild(link);
-      link.click();
       
-      // Small delay before cleanup to ensure download starts
+      // Use a timeout to ensure the click happens in the right context
       setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-        console.log(`File "${fileName}" download triggered and cleaned up`);
-      }, 100);
+        link.click();
+        
+        // Cleanup after a longer delay to ensure download starts
+        setTimeout(() => {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          window.URL.revokeObjectURL(blobUrl);
+          console.log(`File "${fileName}" download triggered and cleaned up`);
+        }, 1000);
+      }, 10);
       
     } catch (error) {
       console.error('Failed to download file:', error);
       
-      // Fallback: Open the URL in a new tab
+      // Enhanced fallback: Create a proper download link
       try {
-        console.log('Fallback: Opening URL in new tab');
-        window.open(url, '_blank');
+        console.log('Fallback: Creating download link');
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = url;
+        fallbackLink.download = fileName.replace('.docx', '.pdf');
+        fallbackLink.target = '_blank';
+        fallbackLink.rel = 'noopener noreferrer';
+        fallbackLink.style.display = 'none';
+        
+        document.body.appendChild(fallbackLink);
+        fallbackLink.click();
+        
+        setTimeout(() => {
+          if (document.body.contains(fallbackLink)) {
+            document.body.removeChild(fallbackLink);
+          }
+        }, 1000);
+        
       } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
+        console.error('All download methods failed:', fallbackError);
+        
+        // Last resort: Simple window.open
+        window.open(url, '_blank');
       }
     }
   };
