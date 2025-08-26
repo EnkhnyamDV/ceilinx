@@ -204,7 +204,7 @@ function App() {
 
   const getTotalValue = () => {
     return localPositions.reduce((sum, pos) => {
-      return sum + calculateGesamtpreis(pos);
+      return sum + (pos.einzelpreis_netto || 0);
     }, 0);
   };
 
