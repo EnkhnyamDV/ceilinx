@@ -210,9 +210,9 @@ function App() {
 
   const getTotalValueTimesQuantity = () => {
     return localPositions.reduce((sum, pos) => {
-      return sum + calculateGesamtpreis;
+      return sum + calculateGesamtpreis(pos);
     }, 0);
-  }
+  };
 
   const hasValidPrices = localPositions.some(pos => (pos.einzelpreis_netto || 0) > 0);
 
@@ -722,34 +722,36 @@ function App() {
 
             {/* Summary */}
             {hasValidPrices && (
-              <div className={`mt-6 p-4 rounded-xl border-l-4 shadow-sm ${
-                isFormSubmitted 
-                  ? 'bg-green-50 border-green-500' 
-                  : 'bg-[#EAEFF7] border-[#203AEA]'
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
-                  <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Nettopreise:</span>
-                  <span className={`text-xl md:text-2xl font-bold ${
-                    isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
-                  }`}>
-                    {formatGermanNumber(getTotalValue())} €
-                  </span>
+              <>
+                <div className={`mt-6 p-4 rounded-xl border-l-4 shadow-sm ${
+                  isFormSubmitted 
+                    ? 'bg-green-50 border-green-500' 
+                    : 'bg-[#EAEFF7] border-[#203AEA]'
+                }`}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
+                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Nettopreise:</span>
+                    <span className={`text-xl md:text-2xl font-bold ${
+                      isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
+                    }`}>
+                      {formatGermanNumber(getTotalValue())} €
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className={`mt-6 p-4 rounded-xl border-l-4 shadow-sm ${
-                isFormSubmitted 
-                  ? 'bg-green-50 border-green-500' 
-                  : 'bg-[#EAEFF7] border-[#203AEA]'
-              }`}>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
-                  <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtpreise:</span>
-                  <span className={`text-xl md:text-2xl font-bold ${
-                    isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
-                  }`}>
-                    {formatGermanNumber(getTotalValueTimesQuantity())} €
-                  </span>
+                <div className={`mt-3 p-4 rounded-xl border-l-4 shadow-sm ${
+                  isFormSubmitted 
+                    ? 'bg-blue-50 border-blue-500' 
+                    : 'bg-[#F0F4FF] border-[#4F46E5]'
+                }`}>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
+                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtpreise:</span>
+                    <span className={`text-xl md:text-2xl font-bold ${
+                      isFormSubmitted ? 'text-blue-600' : 'text-[#4F46E5]'
+                    }`}>
+                      {formatGermanNumber(getTotalValueTimesQuantity())} €
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
             {/* General Comment Section */}
