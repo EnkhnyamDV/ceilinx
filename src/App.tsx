@@ -13,6 +13,7 @@ function App() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingDocument, setIsProcessingDocument] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [commentStates, setCommentStates] = useState<Record<string, boolean>>({});
   const [commentValues, setCommentValues] = useState<Record<string, string>>({});
@@ -70,6 +71,8 @@ function App() {
 
   const triggerN8NWebhook = async (metaId: string) => {
     try {
+      setIsProcessingDocument(true);
+      
       const response = await fetch('https://n8n.digital-vereinfacht.de/webhook/sync-ninox-prices', {
         method: 'POST',
         headers: {
@@ -103,6 +106,8 @@ function App() {
       console.log('Webhook to N8N triggered');
     } catch (error) {
       console.error('Failed to trigger N8N webhook:', error);
+    } finally {
+      setIsProcessingDocument(false);
     }
   };
 
@@ -326,6 +331,13 @@ function App() {
         triggerN8NWebhook(meta.id);
         
         setShowSuccess(true);
+        
+        // Smooth scroll to top after successful submission
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        
         setTimeout(() => setShowSuccess(false), 6000);
       }
     }
@@ -510,9 +522,20 @@ function App() {
             <p className="text-green-600 text-xs md:text-sm mb-2">
               Das Formular ist nun gesperrt und kann nicht mehr bearbeitet werden.
             </p>
-            <p className="text-green-600 text-xs md:text-sm">
-              📄 Ihr Angebotsdokument wird automatisch heruntergeladen.
-            </p>
+            <div className="flex items-center space-x-2">
+              {isProcessingDocument ? (
+                <>
+                  <Loader2 className="w-4 h-4 text-green-600 animate-spin" />
+                  <p className="text-green-600 text-xs md:text-sm">
+                    📄 Dokument wird generiert...
+                  </p>
+                </>
+              ) : (
+                <p className="text-green-600 text-xs md:text-sm">
+                  📄 Ihr Angebotsdokument wird automatisch heruntergeladen.
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -709,8 +732,8 @@ function App() {
                   <tr className="border-b-2 border-gray-100">
                     <th className="text-left py-3 px-2 font-semibold text-[#020028] w-20">OZ</th>
                     <th className="text-left py-3 px-2 font-semibold text-[#020028]">Bezeichnung</th>
-                    <th className="text-center py-3 px-2 font-semibold text-[#020028] w-24">Einheit</th>
                     <th className="text-center py-3 px-2 font-semibold text-[#020028] w-24">Menge</th>
+                    <th className="text-center py-3 px-2 font-semibold text-[#020028] w-24">Einheit</th>
                     <th className="text-right py-3 px-2 font-semibold text-[#020028] w-40 whitespace-nowrap">
                       Einzelpreis netto (€)
                     </th>
@@ -808,16 +831,16 @@ function App() {
                         </div>
                       </td>
                       <td className="py-4 px-2 w-24 text-center">
-                        {position.einheit && (
-                          <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-200">
-                            {position.einheit}
+                        {position.menge && (
+                          <span className="font-mono text-sm text-gray-700">
+                            {formatGermanNumber(position.menge)}
                           </span>
                         )}
                       </td>
                       <td className="py-4 px-2 w-24 text-center">
-                        {position.menge && (
-                          <span className="font-mono text-sm text-gray-700">
-                            {formatGermanNumber(position.menge)}
+                        {position.einheit && (
+                          <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md border border-blue-200">
+                            {position.einheit}
                           </span>
                         )}
                       </td>
@@ -862,21 +885,7 @@ function App() {
                     ? 'bg-green-50 border-green-500' 
                     : 'bg-[#EAEFF7] border-[#203AEA]'
                 }`}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
-                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Nettopreise:</span>
-                    <span className={`text-xl md:text-2xl font-bold ${
-                      isFormSubmitted ? 'text-green-600' : 'text-[#203AEA]'
-                    }`}>
-                      {formatGermanNumber(getTotalValue())} €
-                    </span>
-                  </div>
-                </div>
-                <div className={`mt-3 p-4 rounded-xl border-l-4 shadow-sm ${
-                  isFormSubmitted 
-                    ? 'bg-blue-50 border-blue-500' 
-                    : 'bg-[#F0F4FF] border-[#4F46E5]'
-                }`}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">  
                     <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtpreise:</span>
                     <span className={`text-xl md:text-2xl font-bold ${
                       isFormSubmitted ? 'text-blue-600' : 'text-[#4F46E5]'
