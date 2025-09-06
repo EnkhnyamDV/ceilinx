@@ -89,17 +89,27 @@ function App() {
         
         // Handle both array and single object responses
         let fileInfo = null;
-        if (Array.isArray(data) && data.length > 0 && data[0].url) {
+        if (Array.isArray(data) && data.length > 0) {
           fileInfo = data[0];
-        } else if (data && data.url) {
+        } else if (data && (data.fileData || data.url)) {
           fileInfo = data;
         }
         
         if (fileInfo) {
-          console.log('Downloading file:', fileInfo.fileName, 'from:', fileInfo.url);
-          await downloadFile(fileInfo.url, fileInfo.fileName || 'document.pdf');
+          console.log('Processing file:', fileInfo.fileName);
+          
+          // Check if we have base64 data or URL
+          if (fileInfo.fileData) {
+            console.log('Downloading from base64 data');
+            await downloadFileFromBase64(fileInfo.fileData, fileInfo.fileName || 'document.pdf');
+          } else if (fileInfo.url) {
+            console.log('Downloading from URL:', fileInfo.url);
+            await downloadFile(fileInfo.url, fileInfo.fileName || 'document.pdf');
+          } else {
+            console.warn('No file data or URL found in response');
+          }
         } else {
-          console.warn('No file URL found in webhook response');
+          console.warn('No file info found in webhook response');
         }
       }
       
@@ -108,6 +118,75 @@ function App() {
       console.error('Failed to trigger N8N webhook:', error);
     } finally {
       setIsProcessingDocument(false);
+    }
+  };
+
+  const downloadFileFromBase64 = async (base64Data: string, fileName: string) => {
+    try {
+      console.log('Converting base64 to file:', fileName);
+      
+      // Remove data URL prefix if present (e.g., "data:application/pdf;base64,")
+      const base64String = base64Data.includes(',') 
+        ? base64Data.split(',')[1] 
+        : base64Data;
+      
+      // Convert base64 to binary
+      const binaryString = atob(base64String);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      // Create blob with proper PDF MIME type
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      
+      console.log('Base64 blob created, size:', blob.size, 'type:', blob.type);
+      
+      // Try modern File System Access API first
+      if ('showSaveFilePicker' in window) {
+        try {
+          const fileHandle = await (window as any).showSaveFilePicker({
+            suggestedName: fileName.replace('.docx', '.pdf'),
+            types: [{
+              description: 'PDF files',
+              accept: { 'application/pdf': ['.pdf'] }
+            }]
+          });
+          
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          
+          console.log('File saved via File System Access API');
+          return;
+        } catch (fsError) {
+          console.log('File System Access API failed or cancelled:', fsError);
+          // Fall through to traditional download
+        }
+      }
+      
+      // Traditional blob download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName.replace('.docx', '.pdf');
+      link.rel = 'noopener noreferrer';
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      
+      console.log('Base64 file download triggered successfully');
+      
+    } catch (error) {
+      console.error('Failed to download file from base64:', error);
+      
+      // Fallback: show error message
+      alert(`Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
