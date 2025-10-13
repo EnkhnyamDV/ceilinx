@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, Building2, AlertCircle, Loader2, Phone, User, FileText, Building, Mail, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { Send, CheckCircle2, Building2, AlertCircle, Loader2, Phone, User, Building, Mail, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useFormData } from './hooks/useFormData';
 import { getFormIdFromUrl, formatGermanNumber, parseGermanNumber } from './utils/urlParams';
 import { FormPosition } from './lib/supabase';
@@ -19,15 +19,6 @@ function App() {
   const [commentValues, setCommentValues] = useState<Record<string, string>>({});
   const [globalLangtextVisible, setGlobalLangtextVisible] = useState(false);
   const [generalComment, setGeneralComment] = useState('');
-
-  // Company information - these would typically come from props or context
-  const companyInfo = {
-    senderCompany: "Ceilinx GmbH",
-    offerNumber: "AG-2024-0152",
-    contactPerson: "Max Mustermann",
-    contactPhone: "+49 2405 1234567",
-    contactEmail: "max.mustermann@ceilinx.de"
-  };
 
   // Update local positions when data loads
   React.useEffect(() => {
@@ -514,18 +505,6 @@ function App() {
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl md:text-3xl font-bold tracking-tight truncate">{meta.lieferantenname}</h1>
-                <p className="text-blue-200 mt-1 text-sm md:text-base">
-                  Angebotsformular • {meta.kalkulation_id || 'Preisabfrage'}
-                </p>
-                {meta.status && (
-                  <span className={`inline-block px-2 md:px-3 py-1 rounded-full text-xs font-medium mt-2 ${
-                    meta.status === 'abgegeben' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-yellow-500 text-black'
-                  }`}>
-                    Status: {meta.status === 'abgegeben' ? 'Abgegeben' : 'Entwurf'}
-                  </span>
-                )}
               </div>
             </div>
 
@@ -546,37 +525,36 @@ function App() {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                    <span className="font-medium text-white">{companyInfo.senderCompany}</span>
+                    <span className="font-medium text-white">Ceilinx GmbH</span>
                   </div>
                 </div>
 
-                {/* Offer Number */}
-                <div className="flex items-center lg:justify-end space-x-2 text-sm">
-                  <FileText className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
-                  <span className="text-blue-200 text-xs">Angebotsnummer:</span>
-                  <span className="font-medium text-white">{companyInfo.offerNumber}</span>
-                </div>
-
                 {/* Contact Person */}
-                <div className="flex items-center lg:justify-end space-x-2 text-sm">
-                  <User className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
-                  <span className="text-blue-200 text-xs">Ansprechpartner:</span>
-                  <span className="font-medium text-white">{companyInfo.contactPerson}</span>
-                </div>
+                {meta.vAnsprechperson && (
+                  <div className="flex items-center lg:justify-end space-x-2 text-sm">
+                    <User className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
+                    <span className="text-blue-200 text-xs">Ansprechpartner:</span>
+                    <span className="font-medium text-white">{meta.vAnsprechperson}</span>
+                  </div>
+                )}
 
                 {/* Phone Number */}
-                <div className="flex items-center lg:justify-end space-x-2 text-sm">
-                  <Phone className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
-                  <span className="text-blue-200 text-xs">Telefon:</span>
-                  <span className="font-medium text-white">{companyInfo.contactPhone}</span>
-                </div>
+                {meta.vAnsprechpersonTelefonNummer && (
+                  <div className="flex items-center lg:justify-end space-x-2 text-sm">
+                    <Phone className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
+                    <span className="text-blue-200 text-xs">Telefon:</span>
+                    <span className="font-medium text-white">{meta.vAnsprechpersonTelefonNummer}</span>
+                  </div>
+                )}
 
                 {/* Email Address */}
-                <div className="flex items-center lg:justify-end space-x-2 text-sm">
-                  <Mail className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
-                  <span className="text-blue-200 text-xs">E-Mail:</span>
-                  <span className="font-medium text-white">{companyInfo.contactEmail}</span>
-                </div>
+                {meta.vAnsprechpersonEmail && (
+                  <div className="flex items-center lg:justify-end space-x-2 text-sm">
+                    <Mail className="w-4 h-4 text-[#beff2e] flex-shrink-0" />
+                    <span className="text-blue-200 text-xs">E-Mail:</span>
+                    <span className="font-medium text-white">{meta.vAnsprechpersonEmail}</span>
+                  </div>
+                )}
               </div>
 
               {/* Accent line */}

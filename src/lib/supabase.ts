@@ -16,6 +16,9 @@ export interface FormMeta {
   status: string | null;
   kalkulation_id: string | null;
   allgemeiner_kommentar: string | null;
+  vAnsprechperson: string | null;
+  vAnsprechpersonTelefonNummer: string | null;
+  vAnsprechpersonEmail: string | null;
   created_at: string | null;
   updated_at: string | null;
 }
