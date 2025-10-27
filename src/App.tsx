@@ -33,6 +33,11 @@ function App() {
   const [skontoDays, setSkontoDays] = useState<number>(0);
   const [pricingResults, setPricingResults] = useState<PricingResults | null>(null);
 
+  // Raw input values for pricing (to avoid formatting issues while typing)
+  const [nachlassInput, setNachlassInput] = useState<string>('');
+  const [mwstInput, setMwstInput] = useState<string>('19');
+  const [skontoInput, setSkontoInput] = useState<string>('');
+
   // Update local positions when data loads
   React.useEffect(() => {
     if (positions.length > 0) {
@@ -71,11 +76,20 @@ function App() {
     }
     // Initialize pricing fields from meta
     if (meta) {
-      setNachlass(meta.nachlass || 0);
+      const nachlassVal = meta.nachlass || 0;
+      const mwstVal = meta.mwst_rate || 19;
+      const skontoVal = meta.skonto_rate || 0;
+      
+      setNachlass(nachlassVal);
       setNachlassType(meta.nachlass_type || 'percentage');
-      setMwstRate(meta.mwst_rate || 19);
-      setSkontoRate(meta.skonto_rate || 0);
+      setMwstRate(mwstVal);
+      setSkontoRate(skontoVal);
       setSkontoDays(meta.skonto_days || 0);
+      
+      // Initialize input strings
+      setNachlassInput(nachlassVal > 0 ? nachlassVal.toString() : '');
+      setMwstInput(mwstVal > 0 ? mwstVal.toString() : '19');
+      setSkontoInput(skontoVal > 0 ? skontoVal.toString() : '');
     }
   }, [meta]);
 
@@ -1029,10 +1043,18 @@ function App() {
                           <div className="flex space-x-2">
                             <input
                               type="text"
-                              value={nachlass > 0 ? formatGermanNumber(nachlass) : ''}
+                              value={nachlassInput}
                               onChange={(e) => {
+                                const value = e.target.value.replace(/[^0-9.,]/g, '');
+                                setNachlassInput(value);
+                              }}
+                              onBlur={(e) => {
                                 const value = parseGermanNumber(e.target.value);
                                 setNachlass(value);
+                                // Format on blur
+                                if (value > 0) {
+                                  setNachlassInput(formatGermanNumber(value));
+                                }
                               }}
                               disabled={isFormSubmitted}
                               placeholder="0,00"
@@ -1089,10 +1111,18 @@ function App() {
                           </label>
                           <input
                             type="text"
-                            value={mwstRate > 0 ? formatGermanNumber(mwstRate) : ''}
+                            value={mwstInput}
                             onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.,]/g, '');
+                              setMwstInput(value);
+                            }}
+                            onBlur={(e) => {
                               const value = parseGermanNumber(e.target.value);
                               setMwstRate(value);
+                              // Format on blur
+                              if (value > 0) {
+                                setMwstInput(formatGermanNumber(value));
+                              }
                             }}
                             disabled={isFormSubmitted}
                             placeholder="19,00"
@@ -1134,10 +1164,18 @@ function App() {
                           </label>
                           <input
                             type="text"
-                            value={skontoRate > 0 ? formatGermanNumber(skontoRate) : ''}
+                            value={skontoInput}
                             onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.,]/g, '');
+                              setSkontoInput(value);
+                            }}
+                            onBlur={(e) => {
                               const value = parseGermanNumber(e.target.value);
                               setSkontoRate(value);
+                              // Format on blur
+                              if (value > 0) {
+                                setSkontoInput(formatGermanNumber(value));
+                              }
                             }}
                             disabled={isFormSubmitted}
                             placeholder="0,00"
