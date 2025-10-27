@@ -1012,7 +1012,7 @@ function App() {
                 </div>
 
                 {/* Pricing Details Section */}
-                <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-2xl p-4 md:p-6 border-2 border-blue-100 shadow-sm">
+                <div className="mt-6 bg-white rounded-2xl p-4 md:p-6 border border-gray-200 shadow-sm">
                   <h3 className="text-lg font-bold text-[#020028] mb-4 flex items-center">
                     <span className="w-1 h-6 bg-[#203AEA] rounded-full mr-3"></span>
                     Preisberechnung
@@ -1020,7 +1020,7 @@ function App() {
 
                   <div className="space-y-4">
                     {/* Row 1: Nachlass (Discount) */}
-                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1070,9 +1070,9 @@ function App() {
                           </div>
                         </div>
                         <div className="flex items-end">
-                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
-                            <div className="text-xs text-gray-600 mb-1">Nachlassbetrag:</div>
-                            <div className="text-lg font-bold text-blue-700 font-mono">
+                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-xs text-gray-500 mb-1">Nachlassbetrag:</div>
+                            <div className="text-lg font-bold text-[#203AEA] font-mono">
                               {pricingResults ? formatGermanNumber(pricingResults.nachlassAmount) : '0,00'} €
                             </div>
                           </div>
@@ -1081,7 +1081,7 @@ function App() {
                     </div>
 
                     {/* Row 2: MwSt (VAT) */}
-                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1103,9 +1103,9 @@ function App() {
                           />
                         </div>
                         <div className="flex items-end">
-                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
-                            <div className="text-xs text-gray-600 mb-1">MwSt-Betrag:</div>
-                            <div className="text-lg font-bold text-blue-700 font-mono">
+                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-xs text-gray-500 mb-1">MwSt-Betrag:</div>
+                            <div className="text-lg font-bold text-[#203AEA] font-mono">
                               {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
                             </div>
                           </div>
@@ -1114,19 +1114,19 @@ function App() {
                     </div>
 
                     {/* Row 3: Gesamtbetrag Brutto (Read-only) */}
-                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4 border-2 border-indigo-300 shadow-md">
+                    <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
                       <div className="flex justify-between items-center">
                         <span className="text-sm md:text-base font-semibold text-[#020028]">
                           Gesamtbetrag Brutto:
                         </span>
-                        <span className="text-xl md:text-2xl font-bold text-indigo-700 font-mono">
+                        <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
                           {pricingResults ? formatGermanNumber(pricingResults.grossTotal) : '0,00'} €
                         </span>
                       </div>
                     </div>
 
                     {/* Row 4: Skonto (Cash Discount) */}
-                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1165,9 +1165,9 @@ function App() {
                           />
                         </div>
                         <div className="flex items-end">
-                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
-                            <div className="text-xs text-gray-600 mb-1">Skontobetrag:</div>
-                            <div className="text-lg font-bold text-blue-700 font-mono">
+                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-xs text-gray-500 mb-1">Skontobetrag:</div>
+                            <div className="text-lg font-bold text-[#203AEA] font-mono">
                               {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
                             </div>
                           </div>
@@ -1178,24 +1178,24 @@ function App() {
                     {/* Final Totals */}
                     <div className="space-y-3 pt-2">
                       {/* Gesamtbetrag Brutto (skontiert) */}
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300 shadow-md">
+                      <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
                         <div className="flex justify-between items-center">
                           <span className="text-sm md:text-base font-semibold text-[#020028]">
                             Gesamtbetrag Brutto (skontiert):
                           </span>
-                          <span className="text-xl md:text-2xl font-bold text-green-700 font-mono">
+                          <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
                             {pricingResults ? formatGermanNumber(pricingResults.finalGrossTotal) : '0,00'} €
                           </span>
                         </div>
                       </div>
 
                       {/* Gesamtbetrag Netto inkl. Nachlass */}
-                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border-2 border-purple-300 shadow-md">
+                      <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
                         <div className="flex justify-between items-center">
                           <span className="text-sm md:text-base font-semibold text-[#020028]">
                             Gesamtbetrag Netto inkl. Nachlass:
                           </span>
-                          <span className="text-xl md:text-2xl font-bold text-purple-700 font-mono">
+                          <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
                             {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
                           </span>
                         </div>
@@ -1209,7 +1209,7 @@ function App() {
             {/* General Comment Section */}
             <div className="mt-6 space-y-4">
               {/* Supplier Contact Person Section */}
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50/50 rounded-xl p-4 border border-indigo-100 shadow-sm">
+              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
                 <h3 className="text-base font-bold text-[#020028] mb-3 flex items-center">
                   <User className="w-5 h-5 mr-2 text-[#203AEA]" />
                   Kontaktperson des Lieferanten
@@ -1221,7 +1221,7 @@ function App() {
                       Vorname
                     </label>
                     {isFormSubmitted ? (
-                      <div className="px-4 py-3 bg-white rounded-lg border-2 border-gray-200 text-sm text-gray-700 shadow-sm">
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 shadow-sm">
                         {meta.lieferant_vorname || '-'}
                       </div>
                     ) : (
@@ -1245,7 +1245,7 @@ function App() {
                       Nachname
                     </label>
                     {isFormSubmitted ? (
-                      <div className="px-4 py-3 bg-white rounded-lg border-2 border-gray-200 text-sm text-gray-700 shadow-sm">
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200 text-sm text-gray-700 shadow-sm">
                         {meta.lieferant_nachname || '-'}
                       </div>
                     ) : (

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="roundedCorners">
+      <rect x="0" y="0" width="100" height="100" rx="20" ry="20"/>
+    </clipPath>
+  </defs>
+  <rect width="100" height="100" fill="white" rx="20" ry="20"/>
+  <image href="/src/assets/logo.png" x="5" y="5" width="90" height="90" clip-path="url(#roundedCorners)"/>
+</svg>
