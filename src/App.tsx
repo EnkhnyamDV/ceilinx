@@ -28,6 +28,8 @@ function App() {
   // Pricing state
   const [nachlass, setNachlass] = useState<number>(0);
   const [nachlassType, setNachlassType] = useState<'percentage' | 'fixed'>('percentage');
+  const [nachlassBetrag, setNachlassBetrag] = useState<number>(0); // EUR amount
+  const [nachlassProzent, setNachlassProzent] = useState<number>(0); // percentage
   const [mwstRate, setMwstRate] = useState<number>(19); // Default 19% VAT
   const [skontoRate, setSkontoRate] = useState<number>(0);
   const [skontoDays, setSkontoDays] = useState<number>(0);
@@ -459,6 +461,8 @@ function App() {
     // Update pricing fields
     const pricingSuccess = await updatePricingFields({
       nachlass,
+      nachlass_betrag: nachlassBetrag,
+      nachlass_prozent: nachlassProzent,
       nachlass_type: nachlassType,
       mwst_rate: mwstRate,
       skonto_rate: skontoRate,
@@ -1051,6 +1055,23 @@ function App() {
                               onBlur={(e) => {
                                 const value = parseGermanNumber(e.target.value);
                                 setNachlass(value);
+                                
+                                // Calculate both percentage and fixed amount
+                                const netTotal = getTotalValueTimesQuantity();
+                                if (netTotal > 0 && value > 0) {
+                                  if (nachlassType === 'percentage') {
+                                    // User entered percentage, calculate fixed amount
+                                    const betrag = netTotal * (value / 100);
+                                    setNachlassProzent(value);
+                                    setNachlassBetrag(betrag);
+                                  } else {
+                                    // User entered fixed amount, calculate percentage
+                                    const prozent = (value / netTotal) * 100;
+                                    setNachlassBetrag(value);
+                                    setNachlassProzent(prozent);
+                                  }
+                                }
+                                
                                 // Format on blur
                                 if (value > 0) {
                                   setNachlassInput(formatGermanNumber(value));
@@ -1066,7 +1087,14 @@ function App() {
                             <div className="flex bg-gray-100 rounded-lg p-1">
                               <button
                                 type="button"
-                                onClick={() => setNachlassType('percentage')}
+                                onClick={() => {
+                                  setNachlassType('percentage');
+                                  // When switching to percentage, update the input to show the percentage value
+                                  if (nachlassProzent > 0) {
+                                    setNachlass(nachlassProzent);
+                                    setNachlassInput(formatGermanNumber(nachlassProzent));
+                                  }
+                                }}
                                 disabled={isFormSubmitted}
                                 className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
                                   nachlassType === 'percentage'
@@ -1078,7 +1106,14 @@ function App() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setNachlassType('fixed')}
+                                onClick={() => {
+                                  setNachlassType('fixed');
+                                  // When switching to fixed, update the input to show the EUR amount
+                                  if (nachlassBetrag > 0) {
+                                    setNachlass(nachlassBetrag);
+                                    setNachlassInput(formatGermanNumber(nachlassBetrag));
+                                  }
+                                }}
                                 disabled={isFormSubmitted}
                                 className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
                                   nachlassType === 'fixed'

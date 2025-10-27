@@ -23,7 +23,9 @@ export interface FormMeta {
   lieferant_vorname: string | null;
   lieferant_nachname: string | null;
   // Pricing fields
-  nachlass: number | null; 
+  nachlass: number | null; // The displayed value (either % or EUR based on nachlass_type)
+  nachlass_betrag: number | null; // Calculated fixed amount in EUR
+  nachlass_prozent: number | null; // Calculated percentage
   nachlass_type: 'percentage' | 'fixed' | null;
   mwst_rate: number | null; 
   skonto_rate: number | null; 

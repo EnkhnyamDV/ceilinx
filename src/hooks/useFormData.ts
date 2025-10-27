@@ -153,6 +153,8 @@ export function useFormData(formId: string | null) {
 
   const updatePricingFields = async (pricingData: {
     nachlass: number;
+    nachlass_betrag: number;
+    nachlass_prozent: number;
     nachlass_type: 'percentage' | 'fixed';
     mwst_rate: number;
     skonto_rate: number;
@@ -165,6 +167,8 @@ export function useFormData(formId: string | null) {
         .from('form_meta')
         .update({
           nachlass: pricingData.nachlass,
+          nachlass_betrag: pricingData.nachlass_betrag,
+          nachlass_prozent: pricingData.nachlass_prozent,
           nachlass_type: pricingData.nachlass_type,
           mwst_rate: pricingData.mwst_rate,
           skonto_rate: pricingData.skonto_rate,
