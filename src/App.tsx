@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, CheckCircle2, Building2, AlertCircle, Loader2, Phone, User, Building, Mail, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useFormData } from './hooks/useFormData';
 import { getFormIdFromUrl, formatGermanNumber, parseGermanNumber } from './utils/urlParams';
 import { FormPosition } from './lib/supabase';
 import { CollapsibleText } from './components/CollapsibleText';
+import { calculatePricing, PricingData, PricingResults } from './utils/pricingCalculations';
 
 function App() {
   const formId = getFormIdFromUrl();
-  const { meta, positions, loading, error, refetch, updatePositions, updateFormStatus, updateGeneralComment } = useFormData(formId);
+  const { meta, positions, loading, error, refetch, updatePositions, updateFormStatus, updateGeneralComment, updatePricingFields } = useFormData(formId);
   
   const [localPositions, setLocalPositions] = useState<FormPosition[]>([]);
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
@@ -19,6 +20,14 @@ function App() {
   const [commentValues, setCommentValues] = useState<Record<string, string>>({});
   const [globalLangtextVisible, setGlobalLangtextVisible] = useState(false);
   const [generalComment, setGeneralComment] = useState('');
+
+  // Pricing state
+  const [nachlass, setNachlass] = useState<number>(0);
+  const [nachlassType, setNachlassType] = useState<'percentage' | 'fixed'>('percentage');
+  const [mwstRate, setMwstRate] = useState<number>(19); // Default 19% VAT
+  const [skontoRate, setSkontoRate] = useState<number>(0);
+  const [skontoDays, setSkontoDays] = useState<number>(0);
+  const [pricingResults, setPricingResults] = useState<PricingResults | null>(null);
 
   // Update local positions when data loads
   React.useEffect(() => {
@@ -51,7 +60,33 @@ function App() {
     if (meta?.allgemeiner_kommentar) {
       setGeneralComment(meta.allgemeiner_kommentar);
     }
+    // Initialize pricing fields from meta
+    if (meta) {
+      setNachlass(meta.nachlass || 0);
+      setNachlassType(meta.nachlass_type || 'percentage');
+      setMwstRate(meta.mwst_rate || 19);
+      setSkontoRate(meta.skonto_rate || 0);
+      setSkontoDays(meta.skonto_days || 0);
+    }
   }, [meta]);
+
+  // Calculate pricing results whenever inputs change
+  React.useEffect(() => {
+    const netTotal = getTotalValueTimesQuantity();
+    if (netTotal > 0) {
+      const results = calculatePricing({
+        netTotal,
+        nachlass,
+        nachlassType,
+        mwstRate,
+        skontoRate,
+        skontoDays,
+      });
+      setPricingResults(results);
+    } else {
+      setPricingResults(null);
+    }
+  }, [localPositions, nachlass, nachlassType, mwstRate, skontoRate, skontoDays]);
 
   const isFormSubmitted = meta?.status === 'abgegeben';
 
@@ -392,7 +427,16 @@ function App() {
     // Update general comment
     const commentSuccess = await updateGeneralComment(generalComment);
     
-    if (positionsSuccess && commentSuccess) {
+    // Update pricing fields
+    const pricingSuccess = await updatePricingFields({
+      nachlass,
+      nachlass_type: nachlassType,
+      mwst_rate: mwstRate,
+      skonto_rate: skontoRate,
+      skonto_days: skontoDays
+    });
+    
+    if (positionsSuccess && commentSuccess && pricingSuccess) {
       // Update status to "abgegeben"
       const statusUpdateSuccess = await updateFormStatus('abgegeben');
       
@@ -722,7 +766,7 @@ function App() {
                   {calculateGesamtpreis(position) > 0 && (
                     <div className="bg-blue-50/80 rounded-lg p-3 mb-3 border border-blue-100">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-blue-700">Gesamtpreis netto (€):</span>
+                        <span className="text-sm font-medium text-blue-700">Gesamtbetrag Netto (€):</span>
                         <div className="px-3 py-1 bg-blue-100 rounded-lg text-right font-mono text-sm text-blue-800 border border-blue-200 font-semibold">
                           {formatGermanNumber(calculateGesamtpreis(position))}
                         </div>
@@ -795,7 +839,7 @@ function App() {
                       Einzelpreis netto (€)
                     </th>
                     <th className="text-right py-3 px-2 font-semibold text-[#020028] w-40 whitespace-nowrap">
-                      Gesamtpreis netto (€)
+                      Gesamtbetrag Netto (€)
                     </th>
                   </tr>
                 </thead>
@@ -943,12 +987,205 @@ function App() {
                     : 'bg-[#EAEFF7] border-[#203AEA]'
                 }`}>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">  
-                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtpreise:</span>
+                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtbeträge Netto:</span>
                     <span className={`text-xl md:text-2xl font-bold ${
                       isFormSubmitted ? 'text-blue-600' : 'text-[#4F46E5]'
                     }`}>
                       {formatGermanNumber(getTotalValueTimesQuantity())} €
                     </span>
+                  </div>
+                </div>
+
+                {/* Pricing Details Section */}
+                <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50/50 rounded-2xl p-4 md:p-6 border-2 border-blue-100 shadow-sm">
+                  <h3 className="text-lg font-bold text-[#020028] mb-4 flex items-center">
+                    <span className="w-1 h-6 bg-[#203AEA] rounded-full mr-3"></span>
+                    Preisberechnung
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Row 1: Nachlass (Discount) */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Nachlass (Discount)
+                          </label>
+                          <div className="flex space-x-2">
+                            <input
+                              type="text"
+                              value={nachlass > 0 ? formatGermanNumber(nachlass) : ''}
+                              onChange={(e) => {
+                                const value = parseGermanNumber(e.target.value);
+                                setNachlass(value);
+                              }}
+                              disabled={isFormSubmitted}
+                              placeholder="0,00"
+                              className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg 
+                                       focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
+                                       transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
+                                       disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            />
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                              <button
+                                type="button"
+                                onClick={() => setNachlassType('percentage')}
+                                disabled={isFormSubmitted}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
+                                  nachlassType === 'percentage'
+                                    ? 'bg-[#203AEA] text-white shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              >
+                                %
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setNachlassType('fixed')}
+                                disabled={isFormSubmitted}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
+                                  nachlassType === 'fixed'
+                                    ? 'bg-[#203AEA] text-white shadow-sm'
+                                    : 'text-gray-600 hover:text-gray-900'
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                              >
+                                EUR
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-end">
+                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
+                            <div className="text-xs text-gray-600 mb-1">Nachlassbetrag:</div>
+                            <div className="text-lg font-bold text-blue-700 font-mono">
+                              {pricingResults ? formatGermanNumber(pricingResults.nachlassAmount) : '0,00'} €
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 2: MwSt (VAT) */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Gesetzl. Mehrwertsteuer (%)
+                          </label>
+                          <input
+                            type="text"
+                            value={mwstRate > 0 ? formatGermanNumber(mwstRate) : ''}
+                            onChange={(e) => {
+                              const value = parseGermanNumber(e.target.value);
+                              setMwstRate(value);
+                            }}
+                            disabled={isFormSubmitted}
+                            placeholder="19,00"
+                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
+                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
+                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
+                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
+                            <div className="text-xs text-gray-600 mb-1">MwSt-Betrag:</div>
+                            <div className="text-lg font-bold text-blue-700 font-mono">
+                              {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Gesamtbetrag Brutto (Read-only) */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg p-4 border-2 border-indigo-300 shadow-md">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm md:text-base font-semibold text-[#020028]">
+                          Gesamtbetrag Brutto:
+                        </span>
+                        <span className="text-xl md:text-2xl font-bold text-indigo-700 font-mono">
+                          {pricingResults ? formatGermanNumber(pricingResults.grossTotal) : '0,00'} €
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Row 4: Skonto (Cash Discount) */}
+                    <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Skonto (%)
+                          </label>
+                          <input
+                            type="text"
+                            value={skontoRate > 0 ? formatGermanNumber(skontoRate) : ''}
+                            onChange={(e) => {
+                              const value = parseGermanNumber(e.target.value);
+                              setSkontoRate(value);
+                            }}
+                            disabled={isFormSubmitted}
+                            placeholder="0,00"
+                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
+                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
+                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
+                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Skontofrist (Tage)
+                          </label>
+                          <input
+                            type="number"
+                            value={skontoDays || ''}
+                            onChange={(e) => setSkontoDays(parseInt(e.target.value) || 0)}
+                            disabled={isFormSubmitted}
+                            placeholder="0"
+                            min="0"
+                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
+                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
+                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
+                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                          />
+                        </div>
+                        <div className="flex items-end">
+                          <div className="flex-1 bg-blue-50/50 rounded-lg p-3 border border-blue-200">
+                            <div className="text-xs text-gray-600 mb-1">Skontobetrag:</div>
+                            <div className="text-lg font-bold text-blue-700 font-mono">
+                              {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Final Totals */}
+                    <div className="space-y-3 pt-2">
+                      {/* Gesamtbetrag Brutto (skontiert) */}
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300 shadow-md">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm md:text-base font-semibold text-[#020028]">
+                            Gesamtbetrag Brutto (skontiert):
+                          </span>
+                          <span className="text-xl md:text-2xl font-bold text-green-700 font-mono">
+                            {pricingResults ? formatGermanNumber(pricingResults.finalGrossTotal) : '0,00'} €
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Gesamtbetrag Netto inkl. Nachlass */}
+                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border-2 border-purple-300 shadow-md">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm md:text-base font-semibold text-[#020028]">
+                            Gesamtbetrag Netto inkl. Nachlass:
+                          </span>
+                          <span className="text-xl md:text-2xl font-bold text-purple-700 font-mono">
+                            {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </>

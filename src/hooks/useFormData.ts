@@ -151,6 +151,46 @@ export function useFormData(formId: string | null) {
     }
   };
 
+  const updatePricingFields = async (pricingData: {
+    nachlass: number;
+    nachlass_type: 'percentage' | 'fixed';
+    mwst_rate: number;
+    skonto_rate: number;
+    skonto_days: number;
+  }) => {
+    if (!data.meta) return false;
+
+    try {
+      const { error } = await supabase
+        .from('form_meta')
+        .update({
+          nachlass: pricingData.nachlass,
+          nachlass_type: pricingData.nachlass_type,
+          mwst_rate: pricingData.mwst_rate,
+          skonto_rate: pricingData.skonto_rate,
+          skonto_days: pricingData.skonto_days
+        })
+        .eq('id', data.meta.id);
+
+      if (error) {
+        throw new Error('Fehler beim Speichern der Preisberechnungen');
+      }
+
+      setData(prev => ({
+        ...prev,
+        meta: prev.meta ? { 
+          ...prev.meta, 
+          ...pricingData
+        } : null
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Error updating pricing fields:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [formId]);
@@ -160,6 +200,7 @@ export function useFormData(formId: string | null) {
     refetch: loadData,
     updatePositions,
     updateFormStatus,
-    updateGeneralComment
+    updateGeneralComment,
+    updatePricingFields
   };
 }

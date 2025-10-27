@@ -19,6 +19,11 @@ export interface FormMeta {
   vAnsprechperson: string | null;
   vAnsprechpersonTelefonNummer: string | null;
   vAnsprechpersonEmail: string | null;
+  nachlass: number | null; 
+  nachlass_type: 'percentage' | 'fixed' | null;
+  mwst_rate: number | null; 
+  skonto_rate: number | null; 
+  skonto_days: number | null; 
   created_at: string | null;
   updated_at: string | null;
 }
