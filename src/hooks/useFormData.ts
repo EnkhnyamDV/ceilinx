@@ -191,6 +191,40 @@ export function useFormData(formId: string | null) {
     }
   };
 
+  const updateSupplierContact = async (contactData: {
+    lieferant_vorname: string;
+    lieferant_nachname: string;
+  }) => {
+    if (!data.meta) return false;
+
+    try {
+      const { error } = await supabase
+        .from('form_meta')
+        .update({
+          lieferant_vorname: contactData.lieferant_vorname,
+          lieferant_nachname: contactData.lieferant_nachname
+        })
+        .eq('id', data.meta.id);
+
+      if (error) {
+        throw new Error('Fehler beim Speichern der Kontaktdaten');
+      }
+
+      setData(prev => ({
+        ...prev,
+        meta: prev.meta ? { 
+          ...prev.meta, 
+          ...contactData
+        } : null
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Error updating supplier contact:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [formId]);
@@ -201,6 +235,7 @@ export function useFormData(formId: string | null) {
     updatePositions,
     updateFormStatus,
     updateGeneralComment,
-    updatePricingFields
+    updatePricingFields,
+    updateSupplierContact
   };
 }

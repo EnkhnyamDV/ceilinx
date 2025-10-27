@@ -8,7 +8,7 @@ import { calculatePricing, PricingData, PricingResults } from './utils/pricingCa
 
 function App() {
   const formId = getFormIdFromUrl();
-  const { meta, positions, loading, error, refetch, updatePositions, updateFormStatus, updateGeneralComment, updatePricingFields } = useFormData(formId);
+  const { meta, positions, loading, error, refetch, updatePositions, updateFormStatus, updateGeneralComment, updatePricingFields, updateSupplierContact } = useFormData(formId);
   
   const [localPositions, setLocalPositions] = useState<FormPosition[]>([]);
   const [inputValues, setInputValues] = useState<Record<string, string>>({});
@@ -20,6 +20,10 @@ function App() {
   const [commentValues, setCommentValues] = useState<Record<string, string>>({});
   const [globalLangtextVisible, setGlobalLangtextVisible] = useState(false);
   const [generalComment, setGeneralComment] = useState('');
+
+  // Supplier contact person state
+  const [lieferantVorname, setLieferantVorname] = useState('');
+  const [lieferantNachname, setLieferantNachname] = useState('');
 
   // Pricing state
   const [nachlass, setNachlass] = useState<number>(0);
@@ -59,6 +63,11 @@ function App() {
   React.useEffect(() => {
     if (meta?.allgemeiner_kommentar) {
       setGeneralComment(meta.allgemeiner_kommentar);
+    }
+    // Initialize supplier contact person fields
+    if (meta) {
+      setLieferantVorname(meta.lieferant_vorname || '');
+      setLieferantNachname(meta.lieferant_nachname || '');
     }
     // Initialize pricing fields from meta
     if (meta) {
@@ -427,6 +436,12 @@ function App() {
     // Update general comment
     const commentSuccess = await updateGeneralComment(generalComment);
     
+    // Update supplier contact information
+    const contactSuccess = await updateSupplierContact({
+      lieferant_vorname: lieferantVorname,
+      lieferant_nachname: lieferantNachname
+    });
+    
     // Update pricing fields
     const pricingSuccess = await updatePricingFields({
       nachlass,
@@ -436,7 +451,7 @@ function App() {
       skonto_days: skontoDays
     });
     
-    if (positionsSuccess && commentSuccess && pricingSuccess) {
+    if (positionsSuccess && commentSuccess && contactSuccess && pricingSuccess) {
       // Update status to "abgegeben"
       const statusUpdateSuccess = await updateFormStatus('abgegeben');
       
@@ -1193,6 +1208,63 @@ function App() {
 
             {/* General Comment Section */}
             <div className="mt-6 space-y-4">
+              {/* Supplier Contact Person Section */}
+              <div className="bg-gradient-to-br from-indigo-50 to-purple-50/50 rounded-xl p-4 border border-indigo-100 shadow-sm">
+                <h3 className="text-base font-bold text-[#020028] mb-3 flex items-center">
+                  <User className="w-5 h-5 mr-2 text-[#203AEA]" />
+                  Kontaktperson des Lieferanten
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Vorname (First Name) */}
+                  <div>
+                    <label htmlFor="lieferant-vorname" className="block text-sm font-medium text-gray-700 mb-2">
+                      Vorname
+                    </label>
+                    {isFormSubmitted ? (
+                      <div className="px-4 py-3 bg-white rounded-lg border-2 border-gray-200 text-sm text-gray-700 shadow-sm">
+                        {meta.lieferant_vorname || '-'}
+                      </div>
+                    ) : (
+                      <input
+                        id="lieferant-vorname"
+                        type="text"
+                        value={lieferantVorname}
+                        onChange={(e) => setLieferantVorname(e.target.value)}
+                        placeholder="Max"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg 
+                                 focus:border-[#203AEA] focus:outline-none text-sm
+                                 transition-all duration-200 hover:border-gray-300
+                                 bg-white shadow-sm focus:shadow-md focus:ring-2 focus:ring-[#203AEA]/10"
+                      />
+                    )}
+                  </div>
+
+                  {/* Nachname (Last Name) */}
+                  <div>
+                    <label htmlFor="lieferant-nachname" className="block text-sm font-medium text-gray-700 mb-2">
+                      Nachname
+                    </label>
+                    {isFormSubmitted ? (
+                      <div className="px-4 py-3 bg-white rounded-lg border-2 border-gray-200 text-sm text-gray-700 shadow-sm">
+                        {meta.lieferant_nachname || '-'}
+                      </div>
+                    ) : (
+                      <input
+                        id="lieferant-nachname"
+                        type="text"
+                        value={lieferantNachname}
+                        onChange={(e) => setLieferantNachname(e.target.value)}
+                        placeholder="Mustermann"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg 
+                                 focus:border-[#203AEA] focus:outline-none text-sm
+                                 transition-all duration-200 hover:border-gray-300
+                                 bg-white shadow-sm focus:shadow-md focus:ring-2 focus:ring-[#203AEA]/10"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100">
                 <label htmlFor="general-comment" className="block text-sm font-medium text-[#020028] mb-3">
                   Allgemeiner Kommentar (optional)

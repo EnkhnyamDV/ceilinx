@@ -19,6 +19,10 @@ export interface FormMeta {
   vAnsprechperson: string | null;
   vAnsprechpersonTelefonNummer: string | null;
   vAnsprechpersonEmail: string | null;
+  // Supplier contact person fields
+  lieferant_vorname: string | null;
+  lieferant_nachname: string | null;
+  // Pricing fields
   nachlass: number | null; 
   nachlass_type: 'percentage' | 'fixed' | null;
   mwst_rate: number | null; 
