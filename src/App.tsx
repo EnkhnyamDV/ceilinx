@@ -1014,21 +1014,6 @@ function App() {
             {/* Summary */}
             {hasValidPrices && (
               <>
-                <div className={`mt-6 p-4 rounded-xl border-l-4 shadow-sm ${
-                  isFormSubmitted 
-                    ? 'bg-green-50 border-green-500' 
-                    : 'bg-[#EAEFF7] border-[#203AEA]'
-                }`}>
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">  
-                    <span className="text-[#020028] font-semibold text-sm md:text-base">Summe aller Gesamtbeträge Netto:</span>
-                    <span className={`text-xl md:text-2xl font-bold ${
-                      isFormSubmitted ? 'text-blue-600' : 'text-[#4F46E5]'
-                    }`}>
-                      {formatGermanNumber(getTotalValueTimesQuantity())} €
-                    </span>
-                  </div>
-                </div>
-
                 {/* Pricing Details Section */}
                 <div className="mt-6 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="space-y-4">
