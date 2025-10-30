@@ -1018,7 +1018,7 @@ function App() {
                 <div className="mt-6 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="space-y-4">
                     {/* Gesamtbetrag Netto (Top Display) */}
-                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700">Gesamtbetrag netto</span>
                         <span className="text-xl font-bold text-[#020028] font-mono">
@@ -1217,15 +1217,15 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Gesamtbetrag Netto inkl. Nachlass (Bottom - Highlighted) */}
-                    <div className="bg-[#4F6BFF] rounded-lg p-4 shadow-sm">
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-white">Gesamtbetrag netto inkl. Nachlass</span>
-                        <span className="text-xl font-bold text-white font-mono">
+                        <span className="text-sm font-medium text-gray-700">Gesamtbetrag netto inkl. Nachlass</span>
+                        <span className="text-xl font-bold text-[#020028] font-mono">
                           {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
                         </span>
                       </div>
                     </div>
+
                   </div>
                 </div>
               </>
