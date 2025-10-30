@@ -1030,120 +1030,113 @@ function App() {
                 </div>
 
                 {/* Pricing Details Section */}
-                <div className="mt-6 bg-white rounded-2xl p-4 md:p-6 border border-gray-200 shadow-sm">
-                  <h3 className="text-lg font-bold text-[#020028] mb-4 flex items-center">
-                    <span className="w-1 h-6 bg-[#203AEA] rounded-full mr-3"></span>
-                    Preisberechnung
-                  </h3>
+                <div className="mt-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 md:p-8 border border-gray-200 shadow-lg">
+                  <div className="space-y-6">
+                    {/* Gesamtbetrag Netto (Top Display) */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border-2 border-blue-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-semibold text-gray-700">Gesamtbetrag netto</span>
+                        <span className="text-2xl font-bold text-[#020028] font-mono">
+                          {formatGermanNumber(getTotalValueTimesQuantity())} €
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="space-y-4">
-                    {/* Row 1: Nachlass (Discount) */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nachlass (Discount)
-                          </label>
-                          <div className="flex space-x-2">
-                            <input
-                              type="text"
-                              value={nachlassInput}
-                              onChange={(e) => {
-                                const value = e.target.value.replace(/[^0-9.,]/g, '');
-                                setNachlassInput(value);
-                              }}
-                              onBlur={(e) => {
-                                const value = parseGermanNumber(e.target.value);
-                                setNachlass(value);
-                                
-                                // Calculate both percentage and fixed amount
-                                const netTotal = getTotalValueTimesQuantity();
-                                if (netTotal > 0 && value > 0) {
-                                  if (nachlassType === 'percentage') {
-                                    // User entered percentage, calculate fixed amount
-                                    const betrag = netTotal * (value / 100);
-                                    setNachlassProzent(value);
-                                    setNachlassBetrag(betrag);
-                                  } else {
-                                    // User entered fixed amount, calculate percentage
-                                    const prozent = (value / netTotal) * 100;
-                                    setNachlassBetrag(value);
-                                    setNachlassProzent(prozent);
-                                  }
+                    {/* Nachlass Section */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-gray-700">Nachlass</label>
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="text"
+                            value={nachlassInput}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^0-9.,]/g, '');
+                              setNachlassInput(value);
+                            }}
+                            onBlur={(e) => {
+                              const value = parseGermanNumber(e.target.value);
+                              setNachlass(value);
+                              
+                              // Calculate both percentage and fixed amount
+                              const netTotal = getTotalValueTimesQuantity();
+                              if (netTotal > 0 && value > 0) {
+                                if (nachlassType === 'percentage') {
+                                  // User entered percentage, calculate fixed amount
+                                  const betrag = netTotal * (value / 100);
+                                  setNachlassProzent(value);
+                                  setNachlassBetrag(betrag);
+                                } else {
+                                  // User entered fixed amount, calculate percentage
+                                  const prozent = (value / netTotal) * 100;
+                                  setNachlassBetrag(value);
+                                  setNachlassProzent(prozent);
                                 }
-                                
-                                // Format on blur
-                                if (value > 0) {
-                                  setNachlassInput(formatGermanNumber(value));
+                              }
+                              
+                              // Format on blur
+                              if (value > 0) {
+                                setNachlassInput(formatGermanNumber(value));
+                              }
+                            }}
+                            disabled={isFormSubmitted}
+                            placeholder="0,00"
+                            className="w-32 px-4 py-2.5 border border-gray-300 rounded-lg 
+                                     focus:border-[#203AEA] focus:ring-2 focus:ring-[#203AEA]/20 
+                                     focus:outline-none text-right font-mono text-sm bg-white
+                                     transition-all duration-200
+                                     disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          />
+                          <div className="flex bg-gray-100 rounded-lg p-1 border border-gray-200">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNachlassType('percentage');
+                                if (nachlassProzent > 0) {
+                                  setNachlass(nachlassProzent);
+                                  setNachlassInput(formatGermanNumber(nachlassProzent));
                                 }
                               }}
                               disabled={isFormSubmitted}
-                              placeholder="0,00"
-                              className="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg 
-                                       focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
-                                       transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
-                                       disabled:bg-gray-50 disabled:cursor-not-allowed"
-                            />
-                            <div className="flex bg-gray-100 rounded-lg p-1">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setNachlassType('percentage');
-                                  // When switching to percentage, update the input to show the percentage value
-                                  if (nachlassProzent > 0) {
-                                    setNachlass(nachlassProzent);
-                                    setNachlassInput(formatGermanNumber(nachlassProzent));
-                                  }
-                                }}
-                                disabled={isFormSubmitted}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                                  nachlassType === 'percentage'
-                                    ? 'bg-[#203AEA] text-white shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              >
-                                %
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setNachlassType('fixed');
-                                  // When switching to fixed, update the input to show the EUR amount
-                                  if (nachlassBetrag > 0) {
-                                    setNachlass(nachlassBetrag);
-                                    setNachlassInput(formatGermanNumber(nachlassBetrag));
-                                  }
-                                }}
-                                disabled={isFormSubmitted}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-all ${
-                                  nachlassType === 'fixed'
-                                    ? 'bg-[#203AEA] text-white shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                              >
-                                EUR
-                              </button>
-                            </div>
+                              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                                nachlassType === 'percentage'
+                                  ? 'bg-[#203AEA] text-white shadow-md'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              %
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNachlassType('fixed');
+                                if (nachlassBetrag > 0) {
+                                  setNachlass(nachlassBetrag);
+                                  setNachlassInput(formatGermanNumber(nachlassBetrag));
+                                }
+                              }}
+                              disabled={isFormSubmitted}
+                              className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-all ${
+                                nachlassType === 'fixed'
+                                  ? 'bg-[#203AEA] text-white shadow-md'
+                                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                              } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              EUR
+                            </button>
                           </div>
-                        </div>
-                        <div className="flex items-end">
-                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-xs text-gray-500 mb-1">Nachlassbetrag:</div>
-                            <div className="text-lg font-bold text-[#203AEA] font-mono">
-                              {pricingResults ? formatGermanNumber(pricingResults.nachlassAmount) : '0,00'} €
-                            </div>
-                          </div>
+                          <span className="text-base font-mono text-gray-700 min-w-[100px] text-right">
+                            {pricingResults ? formatGermanNumber(pricingResults.nachlassAmount) : '0,00'} €
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Row 2: MwSt (VAT) */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Gesetzl. Mehrwertsteuer (%)
-                          </label>
+                    {/* Gesetzl. Mehrwertsteuer Section */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-gray-700">Gesetzl. Mehrwertsteuer</label>
+                        <div className="flex items-center space-x-3">
                           <input
                             type="text"
                             value={mwstInput}
@@ -1154,49 +1147,41 @@ function App() {
                             onBlur={(e) => {
                               const value = parseGermanNumber(e.target.value);
                               setMwstRate(value);
-                              // Format on blur
                               if (value > 0) {
                                 setMwstInput(formatGermanNumber(value));
                               }
                             }}
                             disabled={isFormSubmitted}
                             placeholder="19,00"
-                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
-                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
-                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
-                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            className="w-32 px-4 py-2.5 border border-gray-300 rounded-lg 
+                                     focus:border-[#203AEA] focus:ring-2 focus:ring-[#203AEA]/20 
+                                     focus:outline-none text-right font-mono text-sm bg-white
+                                     transition-all duration-200
+                                     disabled:bg-gray-100 disabled:cursor-not-allowed"
                           />
-                        </div>
-                        <div className="flex items-end">
-                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-xs text-gray-500 mb-1">MwSt-Betrag:</div>
-                            <div className="text-lg font-bold text-[#203AEA] font-mono">
-                              {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
-                            </div>
-                          </div>
+                          <span className="text-sm font-medium text-gray-600 min-w-[60px]">%</span>
+                          <span className="text-base font-mono text-gray-700 min-w-[100px] text-right">
+                            {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Row 3: Gesamtbetrag Brutto (Read-only) */}
-                    <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
+                    {/* Gesamtbetrag Brutto */}
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border-2 border-gray-300">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm md:text-base font-semibold text-[#020028]">
-                          Gesamtbetrag Brutto:
-                        </span>
-                        <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
+                        <span className="text-base font-semibold text-gray-700">Gesamtbetrag brutto</span>
+                        <span className="text-2xl font-bold text-[#020028] font-mono">
                           {pricingResults ? formatGermanNumber(pricingResults.grossTotal) : '0,00'} €
                         </span>
                       </div>
                     </div>
 
-                    {/* Row 4: Skonto (Cash Discount) */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Skonto (%)
-                          </label>
+                    {/* Skonto Section */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="text-sm font-semibold text-gray-700">Skonto</label>
+                        <div className="flex items-center space-x-3">
                           <input
                             type="text"
                             value={skontoInput}
@@ -1207,23 +1192,27 @@ function App() {
                             onBlur={(e) => {
                               const value = parseGermanNumber(e.target.value);
                               setSkontoRate(value);
-                              // Format on blur
                               if (value > 0) {
                                 setSkontoInput(formatGermanNumber(value));
                               }
                             }}
                             disabled={isFormSubmitted}
                             placeholder="0,00"
-                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
-                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
-                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
-                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            className="w-32 px-4 py-2.5 border border-gray-300 rounded-lg 
+                                     focus:border-[#203AEA] focus:ring-2 focus:ring-[#203AEA]/20 
+                                     focus:outline-none text-right font-mono text-sm bg-white
+                                     transition-all duration-200
+                                     disabled:bg-gray-100 disabled:cursor-not-allowed"
                           />
+                          <span className="text-sm font-medium text-gray-600 min-w-[60px]">%</span>
+                          <span className="text-base font-mono text-gray-700 min-w-[100px] text-right">
+                            {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
+                          </span>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Skontofrist (Tage)
-                          </label>
+                      </div>
+                      <div className="flex justify-between items-center pl-4">
+                        <label className="text-sm text-gray-600">Skontofrist</label>
+                        <div className="flex items-center space-x-3">
                           <input
                             type="number"
                             value={skontoDays || ''}
@@ -1231,47 +1220,34 @@ function App() {
                             disabled={isFormSubmitted}
                             placeholder="0"
                             min="0"
-                            className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg 
-                                     focus:border-[#203AEA] focus:outline-none text-right font-mono text-sm
-                                     transition-all duration-200 hover:border-gray-300 bg-white shadow-sm
-                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            className="w-32 px-4 py-2.5 border border-gray-300 rounded-lg 
+                                     focus:border-[#203AEA] focus:ring-2 focus:ring-[#203AEA]/20 
+                                     focus:outline-none text-right font-mono text-sm bg-white
+                                     transition-all duration-200
+                                     disabled:bg-gray-100 disabled:cursor-not-allowed"
                           />
-                        </div>
-                        <div className="flex items-end">
-                          <div className="flex-1 bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-xs text-gray-500 mb-1">Skontobetrag:</div>
-                            <div className="text-lg font-bold text-[#203AEA] font-mono">
-                              {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
-                            </div>
-                          </div>
+                          <span className="text-sm font-medium text-gray-600 min-w-[160px]">Tage</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Final Totals */}
-                    <div className="space-y-3 pt-2">
-                      {/* Gesamtbetrag Brutto (skontiert) */}
-                      <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm md:text-base font-semibold text-[#020028]">
-                            Gesamtbetrag Brutto (skontiert):
-                          </span>
-                          <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
-                            {pricingResults ? formatGermanNumber(pricingResults.finalGrossTotal) : '0,00'} €
-                          </span>
-                        </div>
+                    {/* Gesamtbetrag Brutto (skontiert) */}
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border-2 border-gray-300">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-semibold text-gray-700">Gesamtbetrag brutto (skontiert)</span>
+                        <span className="text-2xl font-bold text-[#020028] font-mono">
+                          {pricingResults ? formatGermanNumber(pricingResults.finalGrossTotal) : '0,00'} €
+                        </span>
                       </div>
+                    </div>
 
-                      {/* Gesamtbetrag Netto inkl. Nachlass */}
-                      <div className="bg-[#EAEFF7] rounded-lg p-4 border border-[#203AEA]/30 shadow-sm">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm md:text-base font-semibold text-[#020028]">
-                            Gesamtbetrag Netto inkl. Nachlass:
-                          </span>
-                          <span className="text-xl md:text-2xl font-bold text-[#203AEA] font-mono">
-                            {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
-                          </span>
-                        </div>
+                    {/* Gesamtbetrag Netto inkl. Nachlass (Bottom - Highlighted) */}
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 border-2 border-blue-700 shadow-xl">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-bold text-white">Gesamtbetrag netto inkl. Nachlass</span>
+                        <span className="text-3xl font-bold text-white font-mono">
+                          {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
+                        </span>
                       </div>
                     </div>
                   </div>
