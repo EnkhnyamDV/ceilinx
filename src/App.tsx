@@ -1028,9 +1028,9 @@ function App() {
                     </div>
 
                     {/* Nachlass Section */}
-                    <div className="flex justify-between items-center py-2">
-                      <label className="text-sm font-medium text-gray-700 w-48">Nachlass</label>
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center py-2">
+                      <label className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Nachlass</label>
+                      <div className="flex items-center gap-3 flex-1 justify-end">
                         <input
                           type="text"
                           value={nachlassInput}
@@ -1116,9 +1116,9 @@ function App() {
                     </div>
 
                     {/* Gesetzl. Mehrwertsteuer Section */}
-                    <div className="flex justify-between items-center py-2">
-                      <label className="text-sm font-medium text-gray-700 w-48">Gesetzl. Mehrwertsteuer</label>
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center py-2">
+                      <label className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Gesetzl. Mehrwertsteuer</label>
+                      <div className="flex items-center gap-3 flex-1 justify-end">
                         <input
                           type="text"
                           value={mwstInput}
@@ -1159,41 +1159,33 @@ function App() {
                     </div>
 
                     {/* Skonto Section */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center py-2">
-                        <label className="text-sm font-medium text-gray-700 w-48">Skonto</label>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="text"
-                            value={skontoInput}
-                            onChange={(e) => {
-                              const value = e.target.value.replace(/[^0-9.,]/g, '');
-                              setSkontoInput(value);
-                            }}
-                            onBlur={(e) => {
-                              const value = parseGermanNumber(e.target.value);
-                              setSkontoRate(value);
-                              if (value > 0) {
-                                setSkontoInput(formatGermanNumber(value));
-                              }
-                            }}
-                            disabled={isFormSubmitted}
-                            placeholder="0,00"
-                            className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg 
-                                     focus:border-[#203AEA] focus:ring-1 focus:ring-[#203AEA]/20 
-                                     focus:outline-none text-right font-mono text-sm bg-white
-                                     transition-all duration-200
-                                     disabled:bg-gray-50 disabled:cursor-not-allowed"
-                          />
-                          <span className="text-sm font-medium text-gray-600 w-[72px]">%</span>
-                          <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
-                            {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center py-2 pl-6">
-                        <label className="text-sm text-gray-600 w-48">Skontofrist</label>
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center py-2">
+                      <label className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Skonto</label>
+                      <div className="flex items-center gap-3 flex-1 justify-end">
+                        <input
+                          type="text"
+                          value={skontoInput}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/[^0-9.,]/g, '');
+                            setSkontoInput(value);
+                          }}
+                          onBlur={(e) => {
+                            const value = parseGermanNumber(e.target.value);
+                            setSkontoRate(value);
+                            if (value > 0) {
+                              setSkontoInput(formatGermanNumber(value));
+                            }
+                          }}
+                          disabled={isFormSubmitted}
+                          placeholder="0,00"
+                          className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg 
+                                   focus:border-[#203AEA] focus:ring-1 focus:ring-[#203AEA]/20 
+                                   focus:outline-none text-right font-mono text-sm bg-white
+                                   transition-all duration-200
+                                   disabled:bg-gray-50 disabled:cursor-not-allowed"
+                        />
+                        <span className="text-sm font-medium text-gray-600 w-[72px]">%</span>
+                        <div className="flex items-center gap-2">
                           <input
                             type="number"
                             value={skontoDays || ''}
@@ -1201,14 +1193,17 @@ function App() {
                             disabled={isFormSubmitted}
                             placeholder="0"
                             min="0"
-                            className="w-24 px-3 py-1.5 border border-gray-300 rounded-lg 
+                            className="w-16 px-2 py-1.5 border border-gray-300 rounded-lg 
                                      focus:border-[#203AEA] focus:ring-1 focus:ring-[#203AEA]/20 
                                      focus:outline-none text-right font-mono text-sm bg-white
                                      transition-all duration-200
                                      disabled:bg-gray-50 disabled:cursor-not-allowed"
                           />
-                          <span className="text-sm font-medium text-gray-600 w-[172px]">Tage</span>
+                          <span className="text-sm text-gray-600">Tage</span>
                         </div>
+                        <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
+                          {pricingResults ? formatGermanNumber(pricingResults.skontoAmount) : '0,00'} €
+                        </span>
                       </div>
                     </div>
 
@@ -1225,7 +1220,7 @@ function App() {
                     {/* Gesamtbetrag Netto inkl. Nachlass (Bottom - Highlighted) */}
                     <div className="bg-[#4F6BFF] rounded-lg p-4 shadow-sm">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-white">Gesamtbetrag netto inkl. Nachlass</span>
+                        <span className="text-sm font-medium text-white">Gesamtbetrag netto inkl. Nachlass</span>
                         <span className="text-xl font-bold text-white font-mono">
                           {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
                         </span>
