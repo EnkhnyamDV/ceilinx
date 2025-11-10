@@ -1158,6 +1158,16 @@ function App() {
                       </div>
                     </div>
 
+                    {/* Ausgewiesene Mehrwertsteuer - Read-only Summary Display */}
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-700">Ausgewiesene Mehrwertsteuer ({formatGermanNumber(mwstRate)} %)</span>
+                        <span className="text-xl font-bold text-[#020028] font-mono">
+                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
+                        </span>
+                      </div>
+                    </div>
+
                     {/* Skonto Section */}
                     <div className="flex items-center py-2">
                       <label className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Skonto</label>
