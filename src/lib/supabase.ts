@@ -28,7 +28,7 @@ export interface FormMeta {
   nachlass_prozent: number | null; // Calculated percentage
   nachlass_type: 'percentage' | 'fixed' | null;
   mwst_rate: number | null; 
-  mwst_rate_no_discount: number | null; // VAT rate without discount applied
+  mwst_amount_no_discount: number | null; // VAT amount in EUR calculated on net without discount
   skonto_rate: number | null; 
   skonto_days: number | null; 
   created_at: string | null;

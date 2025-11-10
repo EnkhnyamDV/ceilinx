@@ -465,7 +465,7 @@ function App() {
       nachlass_prozent: nachlassProzent,
       nachlass_type: nachlassType,
       mwst_rate: mwstRate,
-      mwst_rate_no_discount: pricingResults?.mwstAmountNoDiscount || 0,
+      mwst_amount_no_discount: pricingResults?.mwstAmountNoDiscount || 0,
       skonto_rate: skontoRate,
       skonto_days: skontoDays
     });
