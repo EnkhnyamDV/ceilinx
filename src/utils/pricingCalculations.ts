@@ -23,7 +23,8 @@ export interface PricingResults {
   netTotal: number; // Original net total
   nachlassAmount: number; // Calculated discount amount
   netAfterNachlass: number; // Net total after discount
-  mwstAmount: number; // Calculated VAT amount
+  mwstAmount: number; // Calculated VAT amount (on net after discount)
+  mwstAmountNoDiscount: number; // Calculated VAT amount (on original net, no discount)
   grossTotal: number; // Gross total (Gesamtbetrag Brutto)
   skontoAmount: number; // Calculated cash discount amount
   finalGrossTotal: number; // Gesamtbetrag Brutto (skontiert)
@@ -45,8 +46,11 @@ export function calculatePricing(data: PricingData): PricingResults {
   // Step 2: Net total after discount
   const netAfterNachlass = netTotal - nachlassAmount;
 
-  // Step 3: Calculate VAT (MwSt)
+  // Step 3: Calculate VAT (MwSt) on net after discount
   const mwstAmount = netAfterNachlass * (mwstRate / 100);
+
+  // Step 3a: Calculate VAT on original net total (without discount)
+  const mwstAmountNoDiscount = netTotal * (mwstRate / 100);
 
   // Step 4: Gross total
   const grossTotal = netAfterNachlass + mwstAmount;
@@ -68,6 +72,7 @@ export function calculatePricing(data: PricingData): PricingResults {
     nachlassAmount,
     netAfterNachlass,
     mwstAmount,
+    mwstAmountNoDiscount,
     grossTotal,
     skontoAmount,
     finalGrossTotal,
