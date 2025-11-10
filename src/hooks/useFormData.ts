@@ -157,7 +157,6 @@ export function useFormData(formId: string | null) {
     nachlass_prozent: number;
     nachlass_type: 'percentage' | 'fixed';
     mwst_rate: number;
-    mwst_amount: number;
     skonto_rate: number;
     skonto_days: number;
   }) => {
@@ -172,7 +171,6 @@ export function useFormData(formId: string | null) {
           nachlass_prozent: pricingData.nachlass_prozent,
           nachlass_type: pricingData.nachlass_type,
           mwst_rate: pricingData.mwst_rate,
-          mwst_amount: pricingData.mwst_amount,
           skonto_rate: pricingData.skonto_rate,
           skonto_days: pricingData.skonto_days
         })

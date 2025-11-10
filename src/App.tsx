@@ -465,7 +465,6 @@ function App() {
       nachlass_prozent: nachlassProzent,
       nachlass_type: nachlassType,
       mwst_rate: mwstRate,
-      mwst_amount: pricingResults?.mwstAmount || 0,
       skonto_rate: skontoRate,
       skonto_days: skontoDays
     });
@@ -1143,18 +1142,6 @@ function App() {
                                    disabled:bg-gray-50 disabled:cursor-not-allowed"
                         />
                         <span className="text-sm font-medium text-gray-600 w-[72px]">%</span>
-                        <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
-                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Ausgewiesene Mehrwertsteuer - Read-only Display */}
-                    <div className="flex items-center py-2">
-                      <span className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Ausgewiesene Mehrwertsteuer</span>
-                      <div className="flex items-center gap-3 flex-1 justify-end">
-                        <span className="text-sm font-medium text-gray-600 w-24 text-right">{formatGermanNumber(mwstRate)} %</span>
-                        <span className="text-sm font-medium text-gray-600 w-[72px]"></span>
                         <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
                           {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
                         </span>
