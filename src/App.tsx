@@ -31,6 +31,7 @@ function App() {
   const [nachlassBetrag, setNachlassBetrag] = useState<number>(0); // EUR amount
   const [nachlassProzent, setNachlassProzent] = useState<number>(0); // percentage
   const [mwstRate, setMwstRate] = useState<number>(19); // Default 19% VAT
+  const [mwstRateNoDiscount, setMwstRateNoDiscount] = useState<number>(19); // VAT rate without discount
   const [skontoRate, setSkontoRate] = useState<number>(0);
   const [skontoDays, setSkontoDays] = useState<number>(0);
   const [pricingResults, setPricingResults] = useState<PricingResults | null>(null);
@@ -38,6 +39,7 @@ function App() {
   // Raw input values for pricing (to avoid formatting issues while typing)
   const [nachlassInput, setNachlassInput] = useState<string>('');
   const [mwstInput, setMwstInput] = useState<string>('19');
+  const [mwstNoDiscountInput, setMwstNoDiscountInput] = useState<string>('19');
   const [skontoInput, setSkontoInput] = useState<string>('');
 
   // Update local positions when data loads
@@ -80,17 +82,20 @@ function App() {
     if (meta) {
       const nachlassVal = meta.nachlass || 0;
       const mwstVal = meta.mwst_rate || 19;
+      const mwstNoDiscountVal = meta.mwst_rate_no_discount || 19;
       const skontoVal = meta.skonto_rate || 0;
       
       setNachlass(nachlassVal);
       setNachlassType(meta.nachlass_type || 'percentage');
       setMwstRate(mwstVal);
+      setMwstRateNoDiscount(mwstNoDiscountVal);
       setSkontoRate(skontoVal);
       setSkontoDays(meta.skonto_days || 0);
       
       // Initialize input strings
       setNachlassInput(nachlassVal > 0 ? nachlassVal.toString() : '');
       setMwstInput(mwstVal > 0 ? mwstVal.toString() : '19');
+      setMwstNoDiscountInput(mwstNoDiscountVal > 0 ? mwstNoDiscountVal.toString() : '19');
       setSkontoInput(skontoVal > 0 ? skontoVal.toString() : '');
     }
   }, [meta]);
@@ -465,6 +470,7 @@ function App() {
       nachlass_prozent: nachlassProzent,
       nachlass_type: nachlassType,
       mwst_rate: mwstRate,
+      mwst_rate_no_discount: mwstRateNoDiscount,
       skonto_rate: skontoRate,
       skonto_days: skontoDays
     });
@@ -1148,22 +1154,24 @@ function App() {
                       </div>
                     </div>
 
+                    {/* Ausgewiesene Mehrwertsteuer - Read-only Display */}
+                    <div className="flex items-center py-2">
+                      <span className="text-sm font-medium text-gray-700 w-48 flex-shrink-0">Ausgewiesene Mehrwertsteuer</span>
+                      <div className="flex items-center gap-3 flex-1 justify-end">
+                        <span className="text-sm font-medium text-gray-600 w-24 text-right">{formatGermanNumber(mwstRate)} %</span>
+                        <span className="text-sm font-medium text-gray-600 w-[72px]"></span>
+                        <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
+                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
+                        </span>
+                      </div>
+                    </div>
+
                     {/* Gesamtbetrag Brutto */}
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700">Gesamtbetrag brutto</span>
                         <span className="text-xl font-bold text-[#020028] font-mono">
                           {pricingResults ? formatGermanNumber(pricingResults.grossTotal) : '0,00'} €
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Ausgewiesene Mehrwertsteuer - Read-only Summary Display */}
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700">Ausgewiesene Mehrwertsteuer ({formatGermanNumber(mwstRate)} %)</span>
-                        <span className="text-xl font-bold text-[#020028] font-mono">
-                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
                         </span>
                       </div>
                     </div>
