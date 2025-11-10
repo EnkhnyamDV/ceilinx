@@ -1221,7 +1221,7 @@ function App() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-700">Gesamtbetrag netto inkl. Nachlass</span>
                         <span className="text-xl font-bold text-[#020028] font-mono">
-                          {pricingResults ? formatGermanNumber(pricingResults.finalNetTotal) : '0,00'} €
+                          {pricingResults ? formatGermanNumber(pricingResults.netAfterNachlass) : '0,00'} €
                         </span>
                       </div>
                     </div>
