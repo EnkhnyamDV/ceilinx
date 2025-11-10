@@ -465,7 +465,7 @@ function App() {
       nachlass_prozent: nachlassProzent,
       nachlass_type: nachlassType,
       mwst_rate: mwstRate,
-      mwst_amount_no_discount: pricingResults?.mwstAmountNoDiscount || 0,
+      mwst_amount: pricingResults?.mwstAmount || 0,
       skonto_rate: skontoRate,
       skonto_days: skontoDays
     });
@@ -1156,7 +1156,7 @@ function App() {
                         <span className="text-sm font-medium text-gray-600 w-24 text-right">{formatGermanNumber(mwstRate)} %</span>
                         <span className="text-sm font-medium text-gray-600 w-[72px]"></span>
                         <span className="text-sm font-mono text-gray-700 min-w-[100px] text-right">
-                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmountNoDiscount) : '0,00'} €
+                          {pricingResults ? formatGermanNumber(pricingResults.mwstAmount) : '0,00'} €
                         </span>
                       </div>
                     </div>
